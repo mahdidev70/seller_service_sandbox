@@ -1,19 +1,37 @@
 version: '3.3'
 
 services:
-  ss_worker:
-    build: ./
-    container_name: ss_worker
-    restart: always
-    depends_on:
-      - ss_mysql
-    links:
-      - ss_mysql
-    ports:
-      - "8000:80"
+  # ss_worker:
+  #   build: ./
+  #   container_name: ss_worker
+  #   restart: always
+  #   depends_on:
+  #     - ss_mysql
+  #   links:
+  #     - ss_mysql
+  #   ports:
+  #     - "8000:80"
+  #   volumes:
+  #     - ./Docker/worker/vhosts:/etc/apache2/sites-enabled
+  #     - ./:/var/www
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
     volumes:
-      - ./Docker/worker/vhosts:/etc/apache2/sites-enabled
-      - ./:/var/www
+      - .:/var/www
+    environment:
+      - SYMFONY_ENV=dev
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "8952:80"
+    volumes:
+      - .:/var/www
+      - .nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - php
 
   ss_mysql:
       container_name: ss_mysql

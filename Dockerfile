@@ -1,52 +1,42 @@
-FROM php:8.2-apache
+# Use the official PHP image as a base image
+FROM php:8.2-fpm
 
-RUN echo "ServerName SellerServiceSandbox" >> /etc/apache2/apache2.conf
-
-RUN apt-get update \
-    && apt-get install -qq -y --no-install-recommends \
-    cron \
-    vim \
-    locales \
-    coreutils \
-    apt-utils \
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
     git \
-    libicu-dev \
-    g++ \
+    curl \
     libpng-dev \
-    libxml2-dev \
-    libzip-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
     libonig-dev \
-    libxslt-dev \
-    zlib1g-dev \
-    libsasl2-dev \
-    libssl-dev \
-    librdkafka-dev
+    libzip-dev \
+    unzip \
+    vim
 
-RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen && \
-    echo "fa_IR.UTF-8 UTF-8" >> /etc/locale.gen && \
-    locale-gen
+# Clear cache
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-RUN curl -sSk https://getcomposer.org/installer | php -- --disable-tls && \
-   mv composer.phar /usr/local/bin/composer
+# Install PHP extensions
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
-RUN docker-php-ext-configure intl
-RUN docker-php-ext-install pdo pdo_mysql mysqli gd opcache intl zip calendar dom mbstring zip gd xsl && a2enmod rewrite
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Apcu php ext
-RUN pecl install apcu && docker-php-ext-enable apcu
-
-# Redis php ext
-RUN pecl install redis && docker-php-ext-enable redis
-
-ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
-
-RUN chmod +x /usr/local/bin/install-php-extensions && sync && \
-    install-php-extensions amqp
-
-COPY ./Docker/worker/vhosts /etc/apache2/sites-enabled
-
-COPY . /var/www
-RUN chown -R 775 /var/www
-
+# Set working directory
 WORKDIR /var/www
 
+# Copy existing application directory contents
+COPY . /var/www
+
+# Install application dependencies
+RUN composer install --no-scripts --no-autoloader
+
+# Optimize autoloader
+RUN composer dump-autoload --optimize
+
+# Change ownership of application directory
+RUN chown -R www-data:www-data /var/www
+
+# Expose port 9000 and start php-fpm server
+EXPOSE 9000
+CMD ["php-fpm"]
