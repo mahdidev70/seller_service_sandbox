@@ -21,6 +21,10 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 # Install PHP extensions
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
+# Install PECL and the APCu extension
+RUN pecl install apcu \
+    && docker-php-ext-enable apcu
+
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
@@ -34,7 +38,7 @@ COPY . /var/www
 RUN composer install --no-scripts --no-autoloader
 
 # Optimize autoloader
-RUN composer dump-autoload --optimize
+RUN composer install --no-scripts --no-autoloader
 
 # Change ownership of application directory
 RUN chown -R www-data:www-data /var/www
