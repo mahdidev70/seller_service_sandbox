@@ -37,9 +37,6 @@ COPY . /var/www
 # Install application dependencies
 RUN composer install --no-scripts --no-autoloader
 
-# Optimize autoloader
-RUN composer install --no-scripts --no-autoloader
-
 # Change ownership of application directory
 RUN chown -R www-data:www-data /var/www
 
