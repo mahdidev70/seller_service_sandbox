@@ -3,16 +3,17 @@ FROM php:8.2-fpm
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    php-http \
-    git \
-    curl \
-    libpng-dev \
-    libjpeg62-turbo-dev \
-    libfreetype6-dev \
-    libonig-dev \
-    libzip-dev \
-    unzip \
-    vim
+git \
+curl \
+libpng-dev \
+libjpeg62-turbo-dev \
+libfreetype6-dev \
+libonig-dev \
+libzip-dev \
+unzip \
+vim \
+libpcre3-dev \
+libssl-dev
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
