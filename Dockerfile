@@ -29,10 +29,10 @@ RUN pecl install apcu \
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Set working directory
-WORKDIR /var/www
+# WORKDIR /var/www
 
 # Copy existing application directory contents
-COPY . /var/www
+COPY . .
 
 # Install application dependencies
 RUN composer install --no-scripts --no-autoloader

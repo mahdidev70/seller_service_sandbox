@@ -18,8 +18,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    volumes:
-      - .:/var/www
+    # volumes:
+    #   - .:/var/www
     environment:
       - SYMFONY_ENV=dev
 
