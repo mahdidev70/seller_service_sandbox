@@ -42,6 +42,6 @@ services:
         - MYSQL_DATABASE=seller_service
         - MYSQL_ROOT_PASSWORD=root
       ports:
-        - '3306:3306'
+        - '3241:3306'
       volumes:
         - ./Docker/mysql:/var/lib/mysql
