@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install intl pdo pdo_mysql mbstring zip exif pcntl bcmath opcache
 
 RUN docker-php-ext-configure intl
-RUN docker-php-ext-install pdo pdo_mysql mysqli gd opcache intl zip calendar dom mbstring zip gd xsl && a2enmod rewrite
+# RUN docker-php-ext-install pdo pdo_mysql mysqli gd opcache intl zip calendar dom mbstring zip gd xsl && a2enmod rewrite
 RUN pecl install apcu && docker-php-ext-enable apcu --ini-name docker-php-ext-10-apcu.ini
   
 
