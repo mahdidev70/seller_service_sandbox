@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y \
 
 RUN docker-php-ext-configure intl
 RUN docker-php-ext-install pdo pdo_mysql mysqli gd opcache intl zip calendar dom mbstring zip gd xsl && a2enmod rewrite
-RUN pecl install apcu && docker-php-ext-enable apcu
+RUN pecl install apcu && docker-php-ext-enable apcu --ini-name docker-php-ext-10-apcu.ini
   
 
   ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
