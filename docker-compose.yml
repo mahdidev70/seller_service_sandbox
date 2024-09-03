@@ -1,19 +1,32 @@
-version: '3.3'
+version: '3.8'
 
 services:
-  ss_worker:
-    build: ./
-    container_name: ss_worker
-    restart: always
-    depends_on:
-      - ss_mysql
-    links:
-      - ss_mysql
-    ports:
-      - "8000:80"
+  # PHP service
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: symfony_app
     volumes:
-      - ./Docker/worker/vhosts:/etc/apache2/sites-enabled
-      - ./:/var/www
+      - .:/var/www/symfony
+    ports:
+      - "9000:9000"
+    networks:
+      - symfony
+
+  # MySQL service
+  # db:
+  #   image: mysql:8.0
+  #   container_name: symfony_db
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: root
+  #     MYSQL_DATABASE: symfony
+  #     MYSQL_USER: symfony
+  #     MYSQL_PASSWORD: symfony
+  #   volumes:
+  #     - db_data:/var/lib/mysql
+  #   networks:
+  #     - symfony
 
   ss_mysql:
       container_name: ss_mysql
@@ -24,6 +37,28 @@ services:
         - MYSQL_DATABASE=seller_service
         - MYSQL_ROOT_PASSWORD=root
       ports:
-        - '3306:3306'
+        - '4252:3306'
       volumes:
         - ./Docker/mysql:/var/lib/mysql
+      networks:
+        - symfony
+
+  # Optional Nginx service
+  nginx:
+    image: nginx:alpine
+    container_name: symfony_nginx
+    ports:
+      - "8952:80"
+    volumes:
+      - .:/var/www/symfony
+      - ./Docker/nginx/conf.d:/etc/nginx/conf.d
+    networks:
+      - symfony
+    depends_on:
+      - php
+
+volumes:
+  db_data:
+
+networks:
+  symfony:

@@ -1,52 +1,47 @@
-FROM php:8.2-apache
+# Base image
+FROM php:8.2-fpm
 
-RUN echo "ServerName SellerServiceSandbox" >> /etc/apache2/apache2.conf
-
-RUN apt-get update \
-    && apt-get install -qq -y --no-install-recommends \
-    cron \
-    vim \
-    locales \
-    coreutils \
-    apt-utils \
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
     git \
+    curl \
     libicu-dev \
-    g++ \
-    libpng-dev \
-    libxml2-dev \
-    libzip-dev \
+    libpq-dev \
     libonig-dev \
-    libxslt-dev \
-    zlib1g-dev \
-    libsasl2-dev \
-    libssl-dev \
-    librdkafka-dev
+    libzip-dev \
+    unzip \
+    zip \
+    && docker-php-ext-install intl pdo pdo_mysql mbstring zip exif pcntl bcmath opcache
 
-RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen && \
-    echo "fa_IR.UTF-8 UTF-8" >> /etc/locale.gen && \
-    locale-gen
-
-RUN curl -sSk https://getcomposer.org/installer | php -- --disable-tls && \
-   mv composer.phar /usr/local/bin/composer
-
-RUN docker-php-ext-configure intl
-RUN docker-php-ext-install pdo pdo_mysql mysqli gd opcache intl zip calendar dom mbstring zip gd xsl && a2enmod rewrite
-
-# Apcu php ext
 RUN pecl install apcu && docker-php-ext-enable apcu
 
-# Redis php ext
-RUN pecl install redis && docker-php-ext-enable redis
+  
 
-ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
+  ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 
-RUN chmod +x /usr/local/bin/install-php-extensions && sync && \
-    install-php-extensions amqp
+  RUN chmod +x /usr/local/bin/install-php-extensions && sync && \
+      install-php-extensions http
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-COPY ./Docker/worker/vhosts /etc/apache2/sites-enabled
+# Set working directory
+WORKDIR /var/www/symfony
 
-COPY . /var/www
-RUN chown -R 775 /var/www
+# Copy the Symfony project files to the working directory
+COPY . .
 
-WORKDIR /var/www
+# Install Symfony PHP dependencies
+RUN composer install --no-scripts --no-autoloader
 
+# Copy existing application directory contents
+COPY . /var/www/symfony
+
+# Generate Symfony cache and optimize autoloader
+RUN composer dump-autoload --optimize
+
+# Set permissions
+RUN chown -R www-data:www-data /var/www/symfony
+
+# Expose port 9000 and start PHP-FPM server
+EXPOSE 9000
+CMD ["php-fpm"]
