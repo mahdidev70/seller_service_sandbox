@@ -43,7 +43,7 @@ services:
         - ./Docker/mysql:/var/lib/mysql
       networks:
         - symfony
-      command: rm -rf /var/lib/mysql/*
+      # command: rm -rf /var/lib/mysql/*
 
   # Optional Nginx service
   nginx:
