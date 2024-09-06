@@ -42,6 +42,7 @@ RUN composer dump-autoload --optimize
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/symfony
+RUN chown -R 775 /var/www
 
 # Expose port 9000 and start PHP-FPM server
 EXPOSE 9000
