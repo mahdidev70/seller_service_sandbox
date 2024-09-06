@@ -55,7 +55,7 @@ services:
       - "8952:80"
     volumes:
       - .:/var/www/symfony
-      - ./Docker/nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx.conf:/etc/nginx/conf.d
     networks:
       - symfony
     depends_on:
