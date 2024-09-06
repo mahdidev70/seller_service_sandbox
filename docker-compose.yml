@@ -40,7 +40,7 @@ services:
       ports:
         - '4252:3306'
       volumes:
-        - ./database:/var/lib/mysql
+        - ./Docker/mysql:/var/lib/mysql
       # volumes:
       #   - ./Docker/mysql:/var/lib/mysql
       networks:
